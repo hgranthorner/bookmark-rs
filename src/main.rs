@@ -1,29 +1,26 @@
-use crossterm::event::{poll, read, Event};
-use std::io;
-use std::time::Duration;
-use tui::backend::CrosstermBackend;
-use tui::widgets::{Block, Borders, Widget};
-use tui::Terminal;
+mod models;
 
-fn main() -> Result<(), io::Error> {
-    let stdout = io::stdout();
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
-    loop {
-        if poll(Duration::from_millis(500)).unwrap() {
-            // It's guaranteed that the `read()` won't block when the `poll()`
-            // function returns `true`
-            match read().unwrap() {
-                Event::Key(event) => println!("{:?}", event),
-                Event::Mouse(event) => println!("{:?}", event),
-                Event::Resize(width, height) => println!("New size {}x{}", width, height),
-            }
-        } else {
-            terminal.draw(|mut f| {
-                let size = f.size();
-                let block = Block::default().title("Block").borders(Borders::ALL);
-                f.render_widget(block, size);
-            });
-        }
+use std::fs::{create_dir, File};
+use std::io::Write;
+
+fn main() -> std::io::Result<()> {
+    let bookmark_config_path = dirs::home_dir()
+        .expect("Could not find home directory.")
+        .join(".bkmk_config");
+    let folder_exists = bookmark_config_path.exists();
+    if !folder_exists {
+        let settings = models::Settings::new();
+        create_dir(&bookmark_config_path).expect("Could not create a config directory.");
+        File::create(&bookmark_config_path.join("cache.ron"))
+            .expect("Could not create a cache file.");
+        let mut settings_file = File::create(&bookmark_config_path.join("settings.ron"))
+            .expect("Could not create a cache file.");
+        settings_file
+            .write(settings.serialize().as_bytes())
+            .expect("Could not write to file.");
     }
+    println!("{:?}", bookmark_config_path);
+    println!("{}", folder_exists);
+
+    Ok(())
 }
