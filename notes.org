@@ -1,0 +1,50 @@
+Bookmark
+
+This is a console application that, when run, shows a list of "bookmarked" directories. Think of projectile, but able to be used in any context.
+
+* Mock Up
+
+$ bkmk
+|------------------------------------+-------------------------------------+----------------------------------------------|
+| Here are your available bookmarks: |                                     |                                              |
+|                                    |                                     |                                              |
+|------------------------------------+-------------------------------------+----------------------------------------------|
+| Name                               | Description                         | Path                                         |
+|------------------------------------+-------------------------------------+----------------------------------------------|
+| Dev                                | Where my development work gets done | /Users/$username$/Dev/                       |
+| My Favorite Project                | The best project I've come up with  | /Users/$username/Dev/Projects/MyBestProject/ |
+|                                    |                                     |                                              |
+|                                    |                                     |                                              |
+
+* Flags and commands
+
+- Raw dog
+  - No flags: show help
+  - -i: interactive program
+    - can add, remove, edit entries. Quits with C-q, saves with C-s
+    - -k: keybinds. Accepts "default" (arrow keys), vim, emacs
+- add
+  - No flags: show help
+  - -c: add current directory
+- refresh: if we go with the .bkmk file, it would search the current directory for bookmarks
+
+* Notes
+
+- Navigatable by arrow, vim or emacs keys
+- Should it use a file to store the information, or leave .bkmk files?
+- Should accept a "Name" argument to automatically go to that argument,
+  or no arguments to show the table
+
+* Architecture
+
+** Backend
+  - 3 options:
+    + SQLite
+    + file
+    + .bkmk file
+  - Need to be able to CRUD
+** Frontend
+  - Printlines
+  - Need to research interactive mode
+    + [[https://crates.io/crates/cursive][Cursive]]
+    + [[https://crates.io/crates/tui][Tui]]
