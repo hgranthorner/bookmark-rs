@@ -6,6 +6,41 @@ use std::convert::{From, TryFrom};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+pub enum BookmarkCli {
+    /// Show all available bookmarks
+    List,
+    /// Add a new bookmark
+    Add,
+    /// Remove a bookmark
+    Remove,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Cache(Vec<CacheRecord>);
+
+impl Cache {
+    pub fn new() -> Cache {
+        Cache(Vec::new())
+    }
+
+    pub fn get_records(&self) -> &Vec<CacheRecord> {
+        &self.0
+    }
+
+    pub fn load_from_file(file: &mut File) -> std::result::Result<Cache, ron::Error> {
+        let mut buf = String::new();
+        file.read_to_string(&mut buf)
+            .expect("Failed to read file to string.");
+        if buf == "[]" {
+            Ok(Cache::new())
+        } else {
+            ron::de::from_str(buf.as_str())
+        }
+    }
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CacheRecord {
@@ -44,9 +79,10 @@ impl Settings {
         to_string_pretty(&ser, pretty).expect("Serialization failed.")
     }
 
-    pub fn load(file: &mut File) -> std::result::Result<Settings, regex::Error> {
+    pub fn load_from_file(file: &mut File) -> std::result::Result<Settings, regex::Error> {
         let mut buf = String::new();
-        file.read_to_string(&mut buf).expect("Failed to read file.");
+        file.read_to_string(&mut buf)
+            .expect("Failed to read file to string.");
         let deser: SerializableSettings =
             ron::de::from_str(buf.as_str()).expect("Failed to read file.");
         Settings::try_from(deser)
